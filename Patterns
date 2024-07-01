@@ -1,1 +1,22 @@
-
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: tableau-bridge
+  labels:
+    app: bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tableau-bridge
+  template:
+    metadata:
+      labels:
+        app: tableau-bridge
+    spec:
+      containers:
+      - name: tableau
+        image: krishnakishore27/tableau-bridge:latest
+        command: ['sh', '-c', '/opt/tableau/tableau_bridge/bin/TabBridgeClientWorker -e --patTokenId="kishore" --userEmail="krishnakishore.reddy@salesforce.com" --client="myBridgeAgent" --site="krishnakishorereddy" --patTokenFile="/file.txt" --poolId="1091bfe4-604d-402a-b41c-29ae4b85ec94" && tail -f /dev/null ']
+        ports:
+        - containerPort: 8850
