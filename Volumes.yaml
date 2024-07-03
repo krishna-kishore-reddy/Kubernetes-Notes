@@ -36,3 +36,176 @@ spec:
     volumeMounts:
     - name: emptydir
       mountPath: /usr/share/nginx/html
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tableau-volume
+  labels:
+    app: tableau
+spec:
+  containers:
+    - name: tableau
+      image: krishnakishore27/tableau:tableau-server-2023.3.2
+      volumeMounts:
+        - name:  tableau-volume
+          mountPath: /srv
+  volumes:
+    - name: tableau-volume   # same as the name of volumemounts
+      hostPath:
+        path:  /root/kishore
+        type: directory
+      persistentVolumeClaim:
+      claimName: mypvc
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypv
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/data
+
+# To Create a PV we have to run the command kubectl apply -f .
+# To crosscheck the PVS we have to use the command "kubectl get pv"
+
+---
+
+# This yaml is to claim the volume
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tableau-volume
+  labels:
+    app: tableau
+spec:
+  containers:
+    - name: tableau
+      image: krishnakishore27/tableau:tableau-server-2023.3.2
+      volumeMounts:
+        - name:  tableau-volume
+          mountPath: /srv
+  volumes:
+    - name: tableau-volume   # same as the name of volumemounts
+      PersistentVolumeClaim:
+        claimName: mypvc  #It should match the PersistentVolumeClaim name in metadata
+
+---
+
+apiVersion: v1
+kind: Pod
+spec:
+  name: security-context
+  labels:
+    app: tableau
+  containers:
+    - name: tableau-server
+      image: krishnakishore27/tableau:tableau-server-2023.3.2
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+
+
+---
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: tableau-server
+  labels:
+    app: tableau
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tableau-server
+  template:
+    metadata:
+      labels:
+        app: tableau-server
+    spec:
+      containers:
+        - name: tableau-server-new
+          image: krishnakishore27/tableau:tableau-server-2023.3.2
+          env:
+            - name: LICENSE_KEY
+              value: TSVK-THIS-DATA-GOES-HARD
+            - name: TABLEAU_USERNAME
+              value: admin
+            - name: TABLEAU_PASSWORD
+              value: admin
+            - name: TSM_REMOTE_USERNAME
+              value: root
+            - name: TSM_REMOTE_PASSWORD
+              value: Kishore@98
+          volumeMounts:
+            - name: myvolume
+              mountPath: /opt/tableau/tableau_server
+      volumes:
+        - name:  myvolume
+          persistentVolumeClaim:
+            claimName: mypvc
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tableau-server
+spec:
+  serviceName: tableau-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: tableauserver
+        image: krishnakishore27/tableau:tableau-server-2023.3.2
+        env:
+            - name: LICENSE_KEY
+              value: TSVK-THIS-DATA-GOES-HARD
+            - name: TABLEAU_USERNAME
+              value: admin
+            - name: TABLEAU_PASSWORD
+              value: admin
+            - name: TSM_REMOTE_USERNAME
+              value: root
+            - name: TSM_REMOTE_PASSWORD
+              value: Kishore@98
+            - name: EXT_REP_JSON_FILE
+              value: /docker/external-repository/config.json
+        volumeMounts:
+            - name: myvolume
+              mountPath: /opt/tableau/tableau_server
+      volumes:
+        - name:  myvolume
+          persistentVolumeClaim:
+            claimName: mypvc
+
