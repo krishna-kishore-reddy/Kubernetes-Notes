@@ -17,3 +17,22 @@ spec:
       - name:  nginxvolume
         mountPath: /opt
 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: emptydir
+  labels:
+    app: nginx
+spec:
+  volumes:
+  - name: emptydir
+    emptyDir: {]
+  containers:
+  - name: nginx-emptydir
+    image: nginx:latest
+    command: ['/bin/bash']
+    args: ['-c', 'echo "Hola"']
+    volumeMounts:
+    - name: emptydir
+      mountPath: /usr/share/nginx/html
