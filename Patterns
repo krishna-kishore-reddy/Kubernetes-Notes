@@ -18,13 +18,11 @@ spec:
       - name: tableau
         image: krishnakishore27/tableau-bridge:latest
         command: ['sh', '-c', '/opt/tableau/tableau_bridge/bin/TabBridgeClientWorker -e --patTokenId="kishore" --userEmail="krishnakishore.reddy@salesforce.com" --client="Kishorek8sBridgeAgent" --site="krishnakishorereddy" --patTokenFile="/mnt/file.txt" --poolId="1091bfe4-604d-402a-b41c-29ae4b85ec94" && tail -f /dev/null ']
-        ports:
-        - containerPort: 8850
         volumeMounts:
         - name: bridge
           mountPath: /mnt
       volumes:
       - name: bridge
         hostPath:
-        path: /tmp/bridge
-        type: DirectoryOrCreate
+          path: /tmp/bridge
+          type: DirectoryOrCreate
