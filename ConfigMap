@@ -43,9 +43,9 @@ data:
 
 ---
 apiVersion: v1
-kind:ConfigMap
+kind: ConfigMap
 metadata:
   name: bridge-conf
 data:
   file.txt: |
-    
+    {"kishore" : "2WjY9+CATeSWBaQxkGbjCA==:Srn0mAfMh58j6Zl38LGm76JJF66c9Y5p"}
