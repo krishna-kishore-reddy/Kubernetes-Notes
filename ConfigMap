@@ -10,6 +10,7 @@ kubectl create configmap cus-conf --from-file=/path/to/Directory
 Config Map Declarative Way
 ==========================
 
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,7 +19,7 @@ data:
  KEY1: "VALUE1"
  KEY2: "VALUE2"
  KEY3: "VALUE3"
-
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
