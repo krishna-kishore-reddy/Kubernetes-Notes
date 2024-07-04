@@ -2,6 +2,26 @@ From Literal Value
 ==================
 kubectl create configmap cus-conf --from-literal=KEY1=Value1 --from-literal=KEY2=Value2
 
+apiVersion: v1
+kind: Pod
+metadata:
+ name: configmap-demo-pod
+spec:
+ containers:
+ - name: demo
+ image: alpine
+ command: ["sleep", "3600"]
+ env:
+ - name: ENV_VAL_1
+     valueFrom:
+       configMapKeyRef:
+         name: cus-conf
+         key: KEY1
+ - name: ENV_VAL_2
+     valueFrom:
+       configMapKeyRef:
+         name: cus-con
+
 From file
 =========
 kubectl create configmap cus-conf --from-file=/path/to/config-map.txt
