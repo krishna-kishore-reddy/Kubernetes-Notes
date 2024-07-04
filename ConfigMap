@@ -1,0 +1,51 @@
+From Literal Value
+==================
+kubectl create configmap cus-conf --from-literal=KEY1=Value1 --from-literal=KEY2=Value2
+
+From file
+=========
+kubectl create configmap cus-conf --from-file=/path/to/config-map.txt
+kubectl create configmap cus-conf --from-file=/path/to/Directory
+
+Config Map Declarative Way
+==========================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: game-demo
+data:
+ KEY1: "VALUE1"
+ KEY2: "VALUE2"
+ KEY3: "VALUE3"
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: nginx-conf
+data:
+ nginx.conf: |
+   user nginx;
+   worker_processes 1;
+   events {
+     worker_connections 10240;
+   }
+   http {
+     server {
+       listen 80;
+       server_name localhost;
+       location / {
+         root /usr/share/nginx/html; #Change this line
+         index index.html index.htm;
+       }
+     }
+   }
+
+---
+apiVersion: v1
+kind:ConfigMap
+metadata:
+  name: bridge-conf
+data:
+  file.txt: |
+    
