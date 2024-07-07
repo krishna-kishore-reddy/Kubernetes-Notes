@@ -1,1 +1,56 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx_pod
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+      - containerPort: 80
+    resources:
+      requests:
+        cpu: "1.0"   #we can specify cpu in milli cores are no. of cores as well 1CPU = 1000mi, 1.0 eqauls to 1 core, 0.5 eqauls to the half CPU core that eqauls to 500mi
+        memory: "330Mi"
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      failureThreshold: 8
+    readinessProbe:
+      tcpSocket:
+        port: 3306
+      exec:
+        - curl
+        - localhost:80
 
+
+
+#Liveness Probe
+#Purpose: To determine if a container is alive. If a liveness probe fails, Kubernetes will restart the container to try to recover it.
+#Use Case: This is useful for situations where a container might be running but is in a bad state (e.g., stuck in an infinite loop, deadlocked, etc.) and needs to be restarted to recover.
+#Types:
+#HTTP GET: Kubernetes sends an HTTP GET request to the container.
+#TCP Socket: Kubernetes attempts to open a TCP connection to the container.
+#Exec Command: Kubernetes runs a command inside the container.
+
+
+
+
+#Readiness Probe
+#Purpose: To determine if a container is ready to start accepting traffic. If a readiness probe fails, the container is removed from the service's endpoints until it passes again.
+#Use Case: This is useful for situations where a container needs to complete some startup tasks (like loading data or warming up caches) before it is ready to serve requests.
+##Types:
+#HTTP GET: Kubernetes sends an HTTP GET request to the container.
+#TCP Socket: Kubernetes attempts to open a TCP connection to the container.
+#Exec Command: Kubernetes runs a command inside the container.
+
+
+initialDelaySeconds: Number of seconds after the container has started before the probe is initiated.
+periodSeconds: How often (in seconds) to perform the probe.
+failureThreshold: When a probe fails, Kubernetes will try this many times before giving up. Giving up in case of a liveness probe means restarting the container. In case of a readiness probe, the pod will be marked Unready.
+successThreshold: Minimum consecutive successes for the probe to be considered successful after having faile
