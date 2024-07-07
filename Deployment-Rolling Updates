@@ -1,1 +1,95 @@
+Kubernetes offers several deployment strategies to manage updates and rollouts of your applications. The main strategies are:
 
+1. **Recreate**: Terminates all old pods before creating new ones.
+2. **RollingUpdate**: Gradually replaces old pods with new ones. This is the default strategy.
+3. **Blue/Green Deployment**: Maintains two environments (blue and green). Traffic is switched from one environment to the other once the new version is validated.
+4. **Canary Deployment**: Gradually shifts traffic to the new version by creating a small number of new pods alongside the old pods and increasing the number of new pods while monitoring metrics.
+
+### RollingUpdate Strategy Parameters
+When using the `RollingUpdate` strategy, you can control the speed and behavior of the rollout with parameters like `maxSurge` and `maxUnavailable`.
+
+#### maxSurge
+- **Definition**: Specifies the maximum number of pods that can be created above the desired number of pods during a rolling update.
+- **Type**: Can be an absolute number or a percentage.
+- **Example**: `maxSurge: 1` or `maxSurge: 25%`
+
+#### maxUnavailable
+- **Definition**: Specifies the maximum number of pods that can be unavailable during the update process.
+- **Type**: Can be an absolute number or a percentage.
+- **Example**: `maxUnavailable: 1` or `maxUnavailable: 25%`
+
+### Deployment Object Example
+Here’s an example of a deployment object using the `RollingUpdate` strategy with `maxSurge` and `maxUnavailable`:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16.1
+        ports:
+        - containerPort: 80
+```
+
+### Additional Deployment Strategy Parameters
+1. **minReadySeconds**:
+   - **Definition**: The minimum number of seconds a new pod should be ready before it is considered available.
+   - **Example**: `minReadySeconds: 30`
+
+2. **progressDeadlineSeconds**:
+   - **Definition**: The maximum time in seconds for a deployment to make progress before it is considered failed.
+   - **Example**: `progressDeadlineSeconds: 600`
+
+3. **revisionHistoryLimit**:
+   - **Definition**: The number of old ReplicaSets to retain for rollback purposes.
+   - **Example**: `revisionHistoryLimit: 10`
+
+### Full Deployment Example with Additional Parameters
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 30
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16.1
+        ports:
+        - containerPort: 80
+```
+
+These parameters allow you to fine-tune the deployment process to meet your application's needs, ensuring a smooth and controlled rollout of updates.
