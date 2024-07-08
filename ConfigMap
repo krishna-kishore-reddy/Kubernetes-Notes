@@ -21,6 +21,15 @@ spec:
      valueFrom:
        configMapKeyRef:
          name: cus-con
+  volumeMounts:
+    - name: kishore
+      mountPath: /opt
+  volumes:
+  - name: kishore
+    configMap:
+      name: cus-conf
+   
+  
 
 From file
 =========
