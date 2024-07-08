@@ -1,4 +1,91 @@
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mangodb-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 10Gi
+  persistentVolumeReclaimPlocy: Retain
+  awsElasticBlockStore:
+    volumeID: volume-id
+    fsType: xfs
+
+# In Cloud first you have create a disk then only we can use it in static provisioning 
+---
+
+# for hostpath
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tableau-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/tableau
+    type: Directory
+
+---
+
+#Claiming Persistent Volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tableau-pvc
+spec:
+  storageClassName: ""
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+#Assiging the claim to the pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tableau-pvc-claim
+  labels:
+    app: tableau-pvc-claim
+spec:
+  volumes:
+  - name: tableau
+    persistentVolumeClaim:
+      claimName: tableau-pvc
+  containers:
+  - name: tableau
+    image: nginx
+    volumeMounts:
+    - name: tableau
+      mountPath: /opt
+
+
+# Reclaim Policies
+
+# Retain: This won't delete any data from the disk once the pod is deleted
+#         If you want to use the same disk to another pod then you have to manually delete the PV
+#         Once PV is deleted you have to create a new PV & PVC and attach it to pod to use the same data
+# This means if you use retain policy, eventhough if we delete the pod, pv won't deleted, underlying disk won't get deleted, and also the data also won't get deletd.
+# Only problem here is Admin has to manually delete the pv and need to create a new PV, if we don't want disk any more then we have to delete the disk from cloud vendor manually
+
+
+# Delete: This will delete the data in it and also it will delete the PV and also it will delete the disk from cloud provider
+# This is the default policy for storage class
+
+#Recycle: This is depricated one
+# This will delete the entire data in the disk and it will allow other PVC to claim it again.
+
+
+apiVersion: v1
 kind: Pod 
 metadata:
   name: nginx-volume
