@@ -29,7 +29,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: /opt/tableau
-    type: Directory
+    type: DirectoryOrCreate
 
 ---
 
