@@ -1,0 +1,30 @@
+To provide access to kubernetes cluster, we can provide access to them by using the following way!
+We have to authenticate users by using the certificates to do so the commands as follows.
+
+openssl genrsa -out krishnakishore.key 2048
+
+openssl req -new -key krishnakishore.key -out krishnakishore.csr -subj "/CN=krishnakishore/O=tsi.lan"
+
+openssl x509 -req -in krishnakishore.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out krishnakishore.crt -days 365
+
+Then we have to create a file under user home directory named config
+
+apiVersion: v1
+kind: Config
+clusters:
+  - cluster:
+      certificate-authority: /etc/kubernetes/pki/ca.crt
+      server: https://10.108.15.25:6443
+    name: krishnakishore
+contexts:
+  - context:
+      cluster: krishnakishore
+      user: krishnakishore
+    name: krishnakishore@krishnakishore
+current-context: krishnakishore@krishnakishore
+users:
+  - name: krishnakishore
+    user:
+      client-certificate: /home/krishnakishore/krishnakishore.crt
+      client-key: /home/krishnakishore/krishnakishore.key
+  
