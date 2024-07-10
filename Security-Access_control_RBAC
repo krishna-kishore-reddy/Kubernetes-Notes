@@ -11,6 +11,7 @@ Then we have to create a file under user home directory named config
 
 apiVersion: v1
 kind: Config
+current-context: krishnakishore@krishnakishore
 clusters:
   - cluster:
       certificate-authority: /etc/kubernetes/pki/ca.crt
@@ -21,7 +22,6 @@ contexts:
       cluster: krishnakishore
       user: krishnakishore
     name: krishnakishore@krishnakishore
-current-context: krishnakishore@krishnakishore
 users:
   - name: krishnakishore
     user:
