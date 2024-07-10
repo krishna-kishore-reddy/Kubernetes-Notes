@@ -9,6 +9,11 @@ openssl x509 -req -in krishnakishore.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /
 
 Then we have to create a file under user home directory named config
 
+
+kubectl config get-context
+kubectl config current-context
+kubectl config use-context
+
 apiVersion: v1
 kind: Config
 current-context: krishnakishore@krishnakishore
