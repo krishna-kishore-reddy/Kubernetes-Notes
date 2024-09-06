@@ -1,0 +1,75 @@
+# kubectl get nodes --show-labels
+# NAME      STATUS    ROLES    AGE     VERSION        LABELS
+# worker0   Ready     <none>   1d      v1.13.0        ...,kubernetes.io/hostname=worker0
+# worker1   Ready     <none>   1d      v1.13.0        ...,kubernetes.io/hostname=worker1
+# worker2   Ready     <none>   1d      v1.13.0        ...,kubernetes.io/hostname=worker2
+# kubectl label nodes node1 disktype=ssd
+# kubectl get nodes --show-labels
+# NAME      STATUS    ROLES    AGE     VERSION        LABELS
+# worker0   Ready     <none>   1d      v1.13.0        ...,disktype=ssd,kubernetes.io/hostname=worker0
+# worker1   Ready     <none>   1d      v1.13.0        ...,kubernetes.io/hostname=worker1
+# worker2   Ready     <none>   1d      v1.13.0        ...,kubernetes.io/hostname=worker2
+
+#This manifest describes a Pod that has a requiredDuringSchedulingIgnoredDuringExecution node affinity,disktype: ssd. This means that the pod will get scheduled only on a node that has a disktype=ssd label.
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disktype
+            operator: In
+            values:
+            - ssd            
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+
+
+# Node affinity
+# Node affinity is conceptually similar to nodeSelector, allowing you to constrain which nodes your Pod can be scheduled on based on node labels. There are two types of node affinity:
+
+# requiredDuringSchedulingIgnoredDuringExecution: The scheduler can't schedule the Pod unless the rule is met. This functions like nodeSelector, but with a more expressive syntax.
+# preferredDuringSchedulingIgnoredDuringExecution: The scheduler tries to find a node that meets the rule. If a matching node is not available, the scheduler still schedules the Pod.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In
+            values:
+            - antarctica-east1
+            - antarctica-west1
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: another-node-label-key
+            operator: In
+            values:
+            - another-node-label-value
+  containers:
+  - name: with-node-affinity
+    image: registry.k8s.io/pause:2.0
+
+
+# In this example, the following rules apply:
+
+The node must have a label with the key topology.kubernetes.io/zone and the value of that label must be either antarctica-east1 or antarctica-west1.
+The node preferably has a label with the key another-node-label-key and the value another-node-label-value.
+You can use the operator field to specify a logical operator for Kubernetes to use when interpreting the rules. You can use In, NotIn, Exists, DoesNotExist, Gt and Lt.
+
