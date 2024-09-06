@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-selector-pod
+  labels:
+    app: nginx
+spec:                                   
+  containers:
+  - name: nginx-container
+    image: nginx:latest
+  nodeSelector:
+    node: arm-arch
+
+# If we use nodeselctor option we are hardcoding the POD by saying to POD that you have to sit in the particular node where the specified label matches it
+# Here kube-scheduler don't make his own decesion, it works in such a way where the label matches.
