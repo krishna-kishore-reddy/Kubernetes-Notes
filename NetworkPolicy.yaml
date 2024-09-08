@@ -29,6 +29,19 @@ spec:
   - to:
     - ipBlock:
         cidr: 10.0.0.0/24
+
+# Default deny all ingress traffic
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: inarm
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+
     ports:
     - protocol: TCP
       port: 5978
