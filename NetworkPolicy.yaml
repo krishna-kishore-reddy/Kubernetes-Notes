@@ -29,6 +29,10 @@ spec:
   - to:
     - ipBlock:
         cidr: 10.0.0.0/24
+    ports:
+    - protocol: TCP
+      port: 5978
+
 
 # Default deny all ingress traffic
 ---
@@ -42,7 +46,23 @@ spec:
   policyTypes:
   - Ingress
 
-    ports:
-    - protocol: TCP
-      port: 5978
+# Targeting multiple namespaces by label
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-namespaces
+spec:
+  podSelector:
+    matchLabels:
+      app: myapp
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchExpressions:
+        - key: namespace
+          operator: In
+          values: ["frontend", "backend"]
 
