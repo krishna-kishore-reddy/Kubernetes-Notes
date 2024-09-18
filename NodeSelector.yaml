@@ -13,3 +13,39 @@ spec:
 
 # If we use nodeselctor option we are hardcoding the POD by saying to POD that you have to sit in the particular node where the specified label matches it
 # Here kube-scheduler don't make his own decesion, it works in such a way where the label matches.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bridge
+  labels:
+    app: bridge
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: bridge
+  template:
+    metadata:
+      labels:
+        app: bridge
+    spec:
+      nodeName: kubemaster.tsi.lan
+      volumes:
+      - name: kishore
+        secret:
+          secretName: tableau-secret
+      containers:
+      - name: tableau-bridge
+        image: krishnakishore27/tableau-bridge:latest
+        ports:
+        - containerPort: 80
+        command: ['sh', '-c', '/opt/tableau/tableau_bridge/bin/TabBridgeClientWorker -e --patTokenId="kishore" --userEmail="krishnakishore.reddy@salesforce.com" --client="Kishorek8sSecretAgent" --site="krishnakishorereddy" --patTokenFile="/mnt/file.txt" --poolId="dc372dc4-801e-4025-b98e-a83051e4884d" && tail -f /dev/null ']
+        volumeMounts:
+        - name: kishore
+          mountPath: /mnt
