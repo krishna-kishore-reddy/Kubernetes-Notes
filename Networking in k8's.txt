@@ -1,0 +1,37 @@
+Pod Networking:
+
+Pod: A group of containers that share the same network namespace.
+Pod IP: Each pod is assigned a unique IP address within the cluster.
+CNI (Container Network Interface): A plugin that manages pod networking. It creates network interfaces, assigns IP addresses, and configures routes.
+
+Cluster Networking:
+
+Network Plugin: A component responsible for providing network connectivity between pods and external services.
+Overlay Networks: These networks create a virtual network on top of the physical network.
+Routing: The network plugin handles routing between pods in different nodes.
+Service Discovery: Kubernetes provides a mechanism to discover services within the cluster. This allows pods to communicate with each other without knowing their exact IP addresses.
+
+Service Mesh:
+
+A layer of abstraction: A service mesh provides a layer of abstraction for service-to-service communication.
+Traffic Management: It handles tasks like load balancing, fault tolerance, and security.
+Sidecar Proxy: Each pod typically has a sidecar proxy that handles network traffic.
+
+Key Concepts and Components:
+
+CNI (Container Network Interface): A plugin that manages pod networking.
+Network Plugin: A component responsible for providing network connectivity between pods and external services.
+Overlay Networks: These networks create a virtual network on top of the physical network.
+Service Discovery: Kubernetes provides a mechanism to discover services within the cluster.
+Service Mesh: A layer of abstraction for service-to-service communication.
+Sidecar Proxy: A proxy that handles network traffic for a pod.
+
+Common Networking Approaches:
+
+Overlay Networks: VXLAN, Calico, Flannel, Weave Net, and Cilium are common overlay network solutions.
+Host-Port Networking: Pods can be directly exposed to the host network.
+IP-Per-Pod: Each pod gets its own IP address.
+Additional Considerations:
+Network Policies: Kubernetes allows you to define network policies to control traffic flow between pods.
+Ingress Controllers: Ingress controllers handle incoming traffic to the cluster.
+Load Balancing: Kubernetes provides built-in load balancing capabilities.
