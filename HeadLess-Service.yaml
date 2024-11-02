@@ -11,4 +11,10 @@ spec:
     targetPort: 80
     protocol: TCP
   clusterIP: None 
+
+
+#A headless service in Kubernetes is a type of service that does not have a cluster IP. It allows direct access to the individual pods without going through a load balancer or proxy. 
+#When you create a headless service, the Kubernetes DNS system will return the individual IP addresses of the pods backing the service, allowing clients to connect directly to those pods.
+
+
   
