@@ -90,3 +90,15 @@ requested: requests.memory=700Mi,used: requests.memory=600Mi, limited: requests.
 
 
 
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ckad19-rqc-aecs
+  namespace: ckad19-rqc-ns-aecs
+spec:
+  hard:
+    resourcequotas: "1"  # Limit to 1 ResourceQuota object in this namespace
+
+
+
+
