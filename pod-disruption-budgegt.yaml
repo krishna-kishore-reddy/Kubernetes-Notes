@@ -1,0 +1,27 @@
+#A Pod Disruption Budget (PDB) in Kubernetes is a policy that limits the number of pods that can be simultaneously disrupted (voluntarily evicted or terminated) to ensure high availability 
+#of applications. PDBs are typically used with deployments or other controllers to safeguard critical services during events like maintenance, upgrades, or scaling activities.
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: my-app-pdb
+  namespace: my-namespace
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: my-app
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: my-app-pdb
+  namespace: my-namespace
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: my-app
+
+
