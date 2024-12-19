@@ -1,0 +1,614 @@
+***************************************************************************************************
+*                                                                                                 *
+* Subject: Imperative Commands | Kubernetes                       				  *
+*                                                                                                 *
+* Author: Srinath Challa | Kubernetes SME | Udemy                                                 *
+*                                                                                                 *
+* Connect me on:                                                                                  *    
+* --------------                                                                                  *
+* https://www.udemy.com/user/srinathchalla/                                                       *
+* https://www.linkedin.com/in/srinathchalla/                                                      *
+* https://www.youtube.com/srinathchalla                                                           *
+*                                                                                                 *
+* Reference:                                                                                      * 
+* https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-
+*                                                                                                 *
+***************************************************************************************************
+
+Time Management plays a key role in CKA/CKAD/CKS Exams. Creating and Managing Resources using Imperative Commands helps you perform given task in short time compared to writing YAML file Declaratively, which is time consuming. 
+
+Following Imperative commands helps us creating and managing resources directly from running simple commands. It is important to be familiar with these before attempting CKA/CKAD exam.
+
+***************************************************************************************************
+
+INDEX:
+------
+
+1. Pod
+------------------
+2. Apply
+3. Edit
+4. Delete
+------------------
+5. Label
+6. Describe
+7. Exec
+8. Logs
+9. Top
+10. Namespace
+11. Service Account
+------------------
+12. Deployment
+13. Scale
+14. Set
+15. Rollback
+16. Rollout history
+17. Rollout Undo
+18. Service
+------------------
+19. ConfigMap
+20. Secret
+------------------
+21. Job
+22. CronJob
+------------------
+23. Cordon
+24. Drain
+25. Taint
+26. Uncordon
+------------------
+27. ClusterRole
+28. ClusterRoleBinding
+29. Role
+30. RoleBinding
+
+
+***************************************************************************************************
+
+
+1. POD:
+-------
+# Start a nginx pod.
+kubectl run nginx --image=ngi0nx
+
+# Start a hazelcast pod and let the container expose port 5701
+kubectl run hazelcast --image=hazelcast/hazelcast --port=5701 
+
+# Start a hazelcast pod and set labels "app=hazelcast" and "env=prod" in the container
+kubectl run hazelcast --image=hazelcast/hazelcast --labels="app=hazelcast,env=prod"
+
+# Start a busybox pod and keep it in the foreground, don't restart it if it exits.
+kubectl run -i -t busybox --image=busybox --restart=Never
+
+# Dry run. Print the corresponding API objects without creating them.
+kubectl run nginx --image=nginx --dry-run=client
+
+
+***************************************************************************************************
+
+
+2. APPLY:
+------
+
+# Apply the configuration in mypod.yaml to a pod
+kubectl apply -f mypod.yaml
+
+# Apply the configuration in pod.json to a pod.
+kubectl apply -f ./pod.json
+
+# Apply resources from a directory containing kustomization.yaml - e.g. dir/kustomization.yaml.
+kubectl apply -k dir/
+
+# Apply the JSON passed into stdin to a pod.
+cat pod.json | kubectl apply -f -
+
+# Note: --prune is still in Alpha # Apply the configuration in manifest.yaml that matches label app=nginx and delete all the other resources that are not in the file and match label app=nginx.
+kubectl apply --prune -f manifest.yaml -l app=nginx
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3. EDIT:
+--------
+# Edit the deployment 'mydeployment' in YAML and save the modified config in its annotation:
+kubectl edit deployment/mydeployment -o yaml --save-config
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+4. DELETE:
+----------
+
+# Delete a pod using the type and name specified in pod.json.
+kubectl delete -f ./pod.json
+
+# Delete resources from a directory containing kustomization.yaml - e.g. dir/kustomization.yaml.
+kubectl delete -k dir
+
+# Delete pods and services with same names "baz" and "foo"
+kubectl delete pod,service baz foo
+
+# Delete pods and services with label name=myLabel.
+kubectl delete pods,services -l name=myLabel
+
+# Delete a pod with minimal delay
+kubectl delete pod foo --now
+
+# Force delete a pod on a dead node
+kubectl delete pod foo --force
+
+# Delete all pods
+kubectl delete pods --all
+
+
+
+***************************************************************************************************
+
+
+
+5. NAMESPACE:
+------------
+Create a new namespace named my-namespace
+kubectl create namespace my-namespace
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+6. LABEL:
+---------
+# Update pod 'foo' with the label 'unhealthy' and the value 'true'.
+kubectl label pods foo unhealthy=true
+
+# Update pod 'foo' with the label 'status' and the value 'unhealthy', overwriting any existing value.
+kubectl label --overwrite pods foo status=unhealthy
+
+# Update all pods in the namespace
+kubectl label pods --all status=unhealthy
+
+# Update a pod identified by the type and name in "pod.json"
+kubectl label -f pod.json status=unhealthy
+
+# Update pod 'foo' only if the resource is unchanged from version 1.
+kubectl label pods foo status=unhealthy --resource-version=1
+
+# Update pod 'foo' by removing a label named 'bar' if it exists. # Does not require the --overwrite flag.
+kubectl label pods foo bar-
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+7. DESCRIBE:
+------------
+# Describe a node
+kubectl describe nodes kubernetes-node-emt8.c.myproject.internal
+
+# Describe a pod
+kubectl describe pods/nginx
+
+# Describe a pod identified by type and name in "pod.json"
+kubectl describe -f pod.json
+
+# Describe all pods
+kubectl describe pods
+
+# Describe pods by label name=myLabel
+kubectl describe po -l name=myLabel
+
+# Describe all pods managed by the 'frontend' replication controller (rc-created pods # get the name of the rc as a prefix in the pod the name).
+kubectl describe pods frontend
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+8. EXEC:
+--------
+
+# Get output from running 'date' command from pod mypod, using the first container by default
+kubectl exec mypod -- date
+
+# Get output from running 'date' command in ruby-container from pod mypod
+kubectl exec mypod -c ruby-container -- date
+
+# Switch to raw terminal mode, sends stdin to 'bash' in ruby-container from pod mypod # and sends stdout/stderr from 'bash' back to the client
+kubectl exec mypod -c ruby-container -i -t -- bash -il
+
+# Get output from running 'date' command from the first pod of the deployment mydeployment, using the first container by default
+kubectl exec deploy/mydeployment -- date
+
+# Get output from running 'date' command from the first pod of the service myservice, using the first container by default
+kubectl exec svc/myservice -- date
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+9. LOGS:
+--------
+
+# Return snapshot logs from pod nginx with only one container
+kubectl logs nginx
+
+# Return snapshot logs from pod nginx with multi containers
+kubectl logs nginx --all-containers=true
+
+# Display only the most recent 20 lines of output in pod nginx
+kubectl logs --tail=20 nginx
+
+# Show all logs from pod nginx written in the last hour
+kubectl logs --since=1h nginx
+
+# Return snapshot logs from first container of a job named hello
+kubectl logs job/hello
+
+# Return snapshot logs from container nginx-1 of a deployment named nginx
+kubectl logs deployment/nginx -c nginx-1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+10. TOP:
+--------
+
+# Show metrics for all nodes
+kubectl top node
+
+# Show metrics for a given node
+kubectl top node NODE_NAME
+
+# Show metrics for all pods in the default namespace
+kubectl top pod
+
+# Show metrics for all pods in the given namespace
+kubectl top pod --namespace=NAMESPACE
+
+# Show metrics for a given pod and its containers
+kubectl top pod POD_NAME --containers
+
+# Show metrics for the pods defined by label name=myLabel
+kubectl top pod -l name=myLabe
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+11. SERVICE ACCOUNT:
+--------------------
+
+# Set Deployment nginx-deployment's ServiceAccount to serviceaccount1
+kubectl set serviceaccount deployment nginx-deployment serviceaccount1
+
+# Print the result (in yaml format) of updated nginx deployment with serviceaccount from local file, without hitting apiserver
+kubectl set sa -f nginx-deployment.yaml serviceaccount1 --local --dry-run=client -o yaml
+
+
+
+***************************************************************************************************
+
+
+
+12. DEPLOYMENT:
+--------------
+# Create a deployment named my-dep that runs the busybox image.
+kubectl create deployment my-dep --image=busybox
+
+# Create a deployment with command
+kubectl create deployment my-dep --image=busybox -- date
+
+# Create a deployment named my-dep that runs the nginx image with 3 replicas.
+kubectl create deployment my-dep --image=nginx --replicas=3
+
+# Create a deployment named my-dep that runs the busybox image and expose port 5701.
+kubectl create deployment my-dep --image=busybox --port=5701
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+13. SCALE:
+----------
+
+# If the deployment named mysql's current size is 2, scale mysql to 3
+kubectl scale --current-replicas=2 --replicas=3 deployment/mysql
+
+# Scale a replicaset named 'foo' to 3.
+kubectl scale --replicas=3 rs/foo
+
+# Scale a resource identified by type and name specified in "foo.yaml" to 3.
+kubectl scale --replicas=3 -f foo.yaml
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+14. SET:
+--------
+
+# Set a deployment's nginx container image to 'nginx:1.9.1', and its busybox container image to 'busybox'.
+kubectl set image deployment/nginx busybox=busybox nginx=nginx:1.9.1
+
+# Update all deployments' and rc's nginx container's image to 'nginx:1.9.1'
+kubectl set image deployments,rc nginx=nginx:1.9.1 --all
+
+# Update image of all containers of daemonset abc to 'nginx:1.9.1'
+kubectl set image daemonset abc *=nginx:1.9.1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+15. ROLLBACK:
+------------
+
+# Rollback to the previous deployment
+kubectl rollout undo deployment/abc
+
+# Check the rollout status of a daemonset
+kubectl rollout status daemonset/foo
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+16. Rollout HISTORY:
+--------------------
+# View the rollout history of a deployment
+kubectl rollout history deployment/abc
+
+# View the details of daemonset revision 3
+kubectl rollout history daemonset/abc --revision=3
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+17. Rollout UNDO:
+----------------
+# Rollback to the previous deployment
+kubectl rollout undo deployment/abc
+
+# Rollback to daemonset revision 3
+kubectl rollout undo daemonset/abc --to-revision=3
+
+# Rollback to the previous deployment with dry-run
+kubectl rollout undo --dry-run=server deployment/abc
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+18. SERVICE:
+------------
+
+a. Create Service:
+-----------------
+# Create a new ClusterIP service named my-cs
+kubectl create service clusterip my-cs --tcp=5678:8080
+
+# Create a new ClusterIP service named my-cs (in headless mode)
+kubectl create service clusterip my-cs --clusterip="None"
+
+# Create a new NodePort service named my-ns
+kubectl create service nodeport my-ns --tcp=5678:8080
+
+
+b. Creating Resources by Exposing a Resource:
+---------------------------------------------
+
+# create a service for a replicated nginx, which serves on port 80 and connects to the containers on port 8000.
+kubectl expose rc nginx --port=80 --target-port=8000
+
+# Create a service for a replication controller identified by type and name specified in "nginx-controller.yaml", which serves on port 80 and connects to the containers on port 8000.
+kubectl expose -f nginx-controller.yaml --port=80 --target-port=8000
+
+# Create a service for a pod valid-pod, which serves on port 444 with the name "frontend"
+kubectl expose pod valid-pod --port=444 --name=frontend
+
+# Create a second service based on the above service, exposing the container port 8443 as port 443 with the name "nginx-https"
+kubectl expose service nginx --port=443 --target-port=8443 --name=nginx-https
+
+# Create a service for a replicated streaming application on port 4100 balancing UDP traffic and named 'video-stream'.
+kubectl expose rc streamer --port=4100 --protocol=UDP --name=video-stream
+
+# Create a service for a replicated nginx using replica set, which serves on port 80 and connects to the containers on port 8000.
+kubectl expose rs nginx --port=80 --target-port=8000
+
+# Create a service for an nginx deployment, which serves on port 80 and connects to the containers on port 8000.
+kubectl expose deployment nginx --port=80 --target-port=8000
+
+
+
+***************************************************************************************************
+
+
+
+19. CONFIGMAP:
+--------------
+
+# Create a new configmap named my-config based on folder bar
+kubectl create configmap my-config --from-file=path/to/bar
+
+# Create a new configmap named my-config with specified keys instead of file basenames on disk
+kubectl create configmap my-config --from-file=key1=/path/to/bar/file1.txt --from-file=key2=/path/to/bar/file2.txt
+
+# Create a new configmap named my-config with key1=config1 and key2=config2
+kubectl create configmap my-config --from-literal=key1=config1 --from-literal=key2=config2
+
+# Create a new configmap named my-config from the key=value pairs in the file
+kubectl create configmap my-config --from-file=path/to/bar
+
+# Create a new configmap named my-config from an env file
+kubectl create configmap my-config --from-env-file=path/to/bar.env
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+20. SECRET (Generic)
+--------------------
+
+# Create a new secret named my-secret with keys for each file in folder bar
+kubectl create secret generic my-secret --from-file=path/to/bar
+
+# Create a new secret named my-secret with specified keys instead of names on disk
+kubectl create secret generic my-secret --from-file=ssh-privatekey=path/to/id_rsa --from-file=ssh-publickey=path/to/id_rsa.pub
+
+# Create a new secret named my-secret with key1=supersecret and key2=topsecret
+kubectl create secret generic my-secret --from-literal=key1=supersecret --from-literal=key2=topsecret
+
+# Create a new secret named my-secret using a combination of a file and a literal
+kubectl create secret generic my-secret --from-file=ssh-privatekey=path/to/id_rsa --from-literal=passphrase=topsecret
+
+# create a new secret named my-secret from an env file
+kubectl create secret generic my-secret --from-env-file=path/to/bar.env
+
+
+
+***************************************************************************************************
+
+
+
+21. JOB:
+--------
+# Create a job
+kubectl create job my-job --image=busybox
+
+# Create a job with command
+kubectl create job my-job --image=busybox -- date
+
+# Create a job from a CronJob named "a-cronjob"
+kubectl create job test-job --from=cronjob/a-cronjob
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+22. CRONJOB:
+------------
+# Create a cronjob
+kubectl create cronjob my-job --image=busybox --schedule="*/1 * * * *"
+
+# Create a cronjob with command
+kubectl create cronjob my-job --image=busybox --schedule="*/1 * * * *" -- date
+
+
+
+***************************************************************************************************
+
+
+
+23. CORDON:
+------------
+# Mark node "foo" as unschedulable.
+kubectl cordon foo
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+24. DRAIN:
+---------
+
+# Drain node "foo", even if there are pods not managed by a ReplicationController, ReplicaSet, Job, DaemonSet or StatefulSet on it.
+kubectl drain foo --force
+
+# As above, but abort if there are pods not managed by a ReplicationController, ReplicaSet, Job, DaemonSet or StatefulSet, and use a grace period of 15 minutes.
+kubectl drain foo --grace-period=900
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+25. TAINT:
+----------
+# Update node 'foo' with a taint with key 'dedicated' and value 'special-user' and effect 'NoSchedule'. # If a taint with that key and effect already exists, its value is replaced as specified.
+kubectl taint nodes foo dedicated=special-user:NoSchedule
+
+# Remove from node 'foo' the taint with key 'dedicated' and effect 'NoSchedule' if one exists.
+kubectl taint nodes foo dedicated:NoSchedule-
+
+# Remove from node 'foo' all the taints with key 'dedicated'
+kubectl taint nodes foo dedicated-
+
+# Add a taint with key 'dedicated' on nodes having label mylabel=X
+kubectl taint node -l myLabel=X  dedicated=foo:PreferNoSchedule
+
+# Add to node 'foo' a taint with key 'bar' and no value
+kubectl taint nodes foo bar:NoSchedule
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+26. UNCORDON:
+-------------
+# Mark node "foo" as schedulable.
+kubectl uncordon foo
+
+
+
+***************************************************************************************************
+
+
+
+27. CLUSTERROLE:
+-----------------
+# Create a ClusterRole named "pod-reader" that allows user to perform "get", "watch" and "list" on pods
+kubectl create clusterrole pod-reader --verb=get,list,watch --resource=pods
+
+# Create a ClusterRole named "pod-reader" with ResourceName specified
+kubectl create clusterrole pod-reader --verb=get --resource=pods --resource-name=readablepod
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+28. CLUSTERROLEBINDING:
+------------------------
+# Create a ClusterRoleBinding for user1, user2, and group1 using the cluster-admin ClusterRole
+kubectl create clusterrolebinding cluster-admin --clusterrole=cluster-admin --user=user1 --user
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+29. ROLE:
+---------
+# Create a Role named "pod-reader" that allows user to perform "get", "watch" and "list" on pods
+kubectl create role pod-reader --verb=get --verb=list --verb=watch --resource=pods
+
+# Create a Role named "pod-reader" with ResourceName specified
+kubectl create role pod-reader --verb=get --resource=pods --resource-name=readablepod --resource
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+30. ROLEBINDING:
+----------------
+# Create a RoleBinding for user1, user2, and group1 using the admin ClusterRole 
+kubectl create rolebinding admin --clusterrole=admin --user=user1 --user=user2 --group=group1
+
+
+
+***************************************************************************************************
+
+
+
+31. CONFIG:
+-----------
+
+# Display the current-context
+kubectl config current-context
+
+# List the clusters kubectl knows about
+kubectl config get-clusters
+
+# List all the contexts in your kubeconfig file
+kubectl config get-contexts
+
+# Describe one context in your kubeconfig file.
+kubectl config get-contexts my-context
+
+# Set the user field on the gce context entry without touching other values
+kubectl config set-context gce --user=cluster-admin
+
+# Show merged kubeconfig settings.
+kubectl config view
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+32. EXPLAIN:
+------------
+# Get the documentation of the resource and its fields
+kubectl explain pods
+
+# Get the documentation of a specific field of a resource
+kubectl explain pods.spec.containers
+
+
+
+***************************************************************************************************
+
+33. AUTOSCALING
+---------------
+# How to autoscale an application using HPA
+kubectl autoscale deploy tableau --cpu-percent=50 --min=1 --max=10
+
+# Autoscale application in different namespace
+kubectl autoscale deploy tableau -n tableau --mem-percent --min=1 --max=10
+
+
+C groups and namespaces
+Sigma
+Kernel modifications 
+Orgocd
+Service mesh
+How to build linux kernel image and then auto install linux -- Kickstart installation 
+Tuning in linux
+Migration from cloud to on Prem and vice versa
+
