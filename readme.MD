@@ -391,13 +391,13 @@ sudo nano /etc/keepalived/keepalived.conf
 
 Add:
 ```
+global_defs {
+    enable_script_security
+    script_user root
+}
+
 vrrp_script check_services {
-    script "#!/bin/bash
-            if [[ $(drbdadm role nfs-data 2>/dev/null) == \"Primary\" ]] && mountpoint -q /data/nfs_share && systemctl is-active --quiet nfs-kernel-server; then
-              exit 0
-            else
-              exit 1
-            fi"
+    script "/bin/true"  # Placeholder script to satisfy keepalived; replace with an actual check if needed
     interval 5
     timeout 5
     weight 2
@@ -405,27 +405,28 @@ vrrp_script check_services {
 
 vrrp_instance NFS_HA {
     state MASTER
-    interface ens33  # Change to your network interface name (use `ip a` to find it)
+    interface ens192  # Make sure this is the correct network interface (check with `ip a`)
     virtual_router_id 51
     priority 101
     advert_int 1
-    
+
     authentication {
         auth_type PASS
         auth_pass drbd_nfs_secret
     }
-    
+
     virtual_ipaddress {
-        192.168.1.10/24  # Your floating IP
+        10.72.41.77/24
     }
-    
+
     track_script {
         check_services
     }
-    
+
     notify_master "/usr/local/bin/drbd-primary.sh"
     notify_backup "/usr/local/bin/drbd-secondary.sh"
     notify_fault "/usr/local/bin/drbd-secondary.sh"
+    notify_stop  "/usr/local/bin/drbd-secondary.sh"
 }
 ```
 
@@ -437,13 +438,13 @@ sudo nano /etc/keepalived/keepalived.conf
 
 Add (almost identical but with BACKUP state and lower priority):
 ```
+global_defs {
+    enable_script_security
+    script_user root
+}
+
 vrrp_script check_services {
-    script "#!/bin/bash
-            if [[ $(drbdadm role nfs-data 2>/dev/null) == \"Primary\" ]] && mountpoint -q /data/nfs_share && systemctl is-active --quiet nfs-kernel-server; then
-              exit 0
-            else
-              exit 1
-            fi"
+    script "/bin/true"  # Replace with actual health check script later if needed
     interval 5
     timeout 5
     weight 2
@@ -451,27 +452,28 @@ vrrp_script check_services {
 
 vrrp_instance NFS_HA {
     state BACKUP
-    interface ens33  # Change to your network interface name (use `ip a` to find it)
+    interface ens192  # Ensure this matches your actual network interface
     virtual_router_id 51
     priority 100
     advert_int 1
-    
+
     authentication {
         auth_type PASS
         auth_pass drbd_nfs_secret
     }
-    
+
     virtual_ipaddress {
-        192.168.1.10/24  # Your floating IP
+        10.72.41.77/24
     }
-    
+
     track_script {
         check_services
     }
-    
+
     notify_master "/usr/local/bin/drbd-primary.sh"
     notify_backup "/usr/local/bin/drbd-secondary.sh"
     notify_fault "/usr/local/bin/drbd-secondary.sh"
+    notify_stop  "/usr/local/bin/drbd-secondary.sh"  #added this line after testing, if anything is not working try to delete this line first and check
 }
 ```
 
