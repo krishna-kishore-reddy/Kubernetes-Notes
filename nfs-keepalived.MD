@@ -38,8 +38,8 @@ sudo nano /etc/hosts
 
 Add:
 ```
-192.168.1.1 node1
-192.168.1.2 node2
+10.72.172.25 usr2coknfs02
+10.72.172.26 usr2coknfs03
 ```
 
 ## Step 3: Prepare the Disk for DRBD
@@ -77,12 +77,12 @@ resource nfs-data {
     max-epoch-size 8000;
   }
   
-  on node1 {
-    address 192.168.1.1:7789;
+  on usr2coknfs02 {
+    address 10.72.172.25:7789;
   }
   
-  on node2 {
-    address 192.168.1.2:7789;
+  on usr2coknfs03 {
+    address 10.72.172.26:7789;
   }
   
   syncer {
@@ -416,7 +416,7 @@ vrrp_instance NFS_HA {
     }
 
     virtual_ipaddress {
-        10.72.41.77/24
+        10.72.172.30/24
     }
 
     track_script {
@@ -463,7 +463,7 @@ vrrp_instance NFS_HA {
     }
 
     virtual_ipaddress {
-        10.72.41.77/24
+        10.72.172.30/24
     }
 
     track_script {
@@ -517,7 +517,7 @@ sudo ./usr/local/bin/monitor-ha.sh
 sudo mkdir -p /mnt/nfs_test
 
 # Mount the NFS share using the floating IP
-sudo mount -t nfs -o soft,timeo=10,retrans=2 192.168.1.10:/data/nfs_share /mnt/nfs_test
+sudo mount -t nfs -o soft,timeo=10,retrans=2 10.72.172.30:/data/nfs_share /mnt/nfs_test
 
 # Create a test file
 touch /mnt/nfs_test/testfile
@@ -546,7 +546,7 @@ echo "Hello from NFS" > /mnt/nfs_test/testfile
 4. If the client access hangs, retry mounting:
    ```bash
    sudo umount /mnt/nfs_test
-   sudo mount -t nfs -o soft,timeo=10,retrans=2 192.168.1.10:/data/nfs_share /mnt/nfs_test
+   sudo mount -t nfs -o soft,timeo=10,retrans=2 10.72.172.30:/data/nfs_share /mnt/nfs_test
    ```
 
 ## Step 14: Configure Client for Persistence
@@ -559,7 +559,7 @@ sudo nano /etc/fstab
 
 Add:
 ```
-192.168.1.10:/data/nfs_share /mnt/nfs_test nfs rw,soft,timeo=10,retrans=2 0 0
+10.72.172.30:/data/nfs_share /mnt/nfs_test nfs rw,soft,timeo=10,retrans=2 0 0
 ```
 
 ## Troubleshooting
@@ -591,7 +591,7 @@ sudo systemctl restart nfs-kernel-server
 
 # On client:
 sudo umount /mnt/nfs_test
-sudo mount -t nfs -o soft,timeo=10,retrans=2 192.168.1.10:/data/nfs_share /mnt/nfs_test
+sudo mount -t nfs -o soft,timeo=10,retrans=2 10.72.172.30:/data/nfs_share /mnt/nfs_test
 ```
 
 ### Manual Failover Test
