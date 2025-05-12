@@ -20,6 +20,7 @@ First, update and install required packages on both servers:
 sudo apt update
 
 # Install required packages
+echo "postfix postfix/main_mailer_type select No configuration" | sudo debconf-set-selections
 sudo apt install -y nfs-kernel-server drbd-utils keepalived
 
 # Make sure services are not running yet
