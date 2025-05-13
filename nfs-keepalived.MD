@@ -167,6 +167,13 @@ Configure NFS for better availability:
 sudo nano /etc/default/nfs-kernel-server
 ```
 
+```bash
+sudo vim /etc/nfs.conf
+[mountd]
+port=892
+
+```
+
 Add or modify:
 ```
 RPCMOUNTDOPTS="--manage-gids -p 892"
