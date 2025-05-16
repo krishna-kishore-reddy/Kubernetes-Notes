@@ -628,3 +628,94 @@ sudo tail -f /var/log/syslog
 - **Verify which node is primary** before making changes: `sudo drbdadm role nfs-data`
 - **Test failover regularly** to ensure the system works as expected
 - **Monitor disk space** on the shared filesystem: `df -h /data/nfs_share`
+
+
+Here is your requested content in `.md` (Markdown) format:
+
+````markdown
+# Expanding DRBD with LVM and Reconfiguring NFS
+
+## 1. Backup Your Data
+
+Use `rsync` or take a snapshot **if this is a production environment**.
+
+---
+
+## 2. Stop DRBD and Unmount
+
+Run these commands on **both nodes**:
+
+```bash
+sudo systemctl stop nfs-server
+sudo umount /data/nfs_share
+sudo drbdadm down nfs-data
+````
+
+---
+
+## 3. Create a Volume Group
+
+Assuming `/dev/sdb1` and `/dev/sdc` are your disks:
+
+```bash
+sudo pvcreate /dev/sdb1 /dev/sdc
+sudo vgcreate drbd-vg /dev/sdb1 /dev/sdc
+sudo lvcreate -L 600G -n drbd-lv drbd-vg
+```
+
+> 💡 You can use `-l 100%FREE` instead of `-L 600G` if you want to allocate all available space.
+
+---
+
+## 4. Update DRBD Config
+
+Edit the file `/etc/drbd.d/nfs-data.res`:
+
+```ini
+resource nfs-data {
+  device /dev/drbd0;
+  disk /dev/drbd-lv;  # <- updated
+  meta-disk internal;
+
+  ...
+}
+```
+
+> 🔔 Note: You may need to create a symlink or ensure `/dev/drbd-lv` is visible at boot time.
+
+---
+
+## 5. Recreate Metadata and Bring DRBD Up
+
+```bash
+sudo drbdadm create-md nfs-data
+sudo drbdadm up nfs-data
+sudo drbdadm primary --force nfs-data
+```
+
+---
+
+## 6. Format and Remount
+
+### If no data is present (fresh setup):
+
+```bash
+sudo mkfs.ext4 /dev/drbd0
+```
+
+### If you're restoring:
+
+```bash
+sudo mount /dev/drbd0 /data/nfs_share
+sudo systemctl start nfs-server
+```
+
+---
+
+✅ Your DRBD volume should now be using the new LVM-backed configuration with expanded capacity.
+
+```
+
+Let me know if you'd like this saved to a file or want a downloadable version.
+```
+
