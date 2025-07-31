@@ -36,7 +36,7 @@ Ensure both nodes are fully synchronized.
 
 ```bash
 apt update
-apt install -y pacemaker corosync fence-agents fence-agents-vmware-common
+apt install -y pacemaker corosync fence-agents resource-agents-*
 ```
 
 ### 2.2 Stop Keepalived & NFS Services
@@ -71,9 +71,9 @@ pcs cluster enable --all
 
 ```bash
 pcs stonith create vm-fence fence_vmware_soap \
-  ipaddr=<vcenter-ip-or-hostname> \
-  login=<vcenter-user> \
-  passwd=<vcenter-pass> \
+  ip=<vcenter-ip-or-hostname> \
+  username=<vcenter-user> \
+  password=<vcenter-pass> \
   ssl_insecure=1 \
   pcmk_host_map="dea2coknfs-0101:vm01;dea2coknfs-0102:vm02" \
   pcmk_host_check=static-list \
@@ -93,7 +93,7 @@ Replace `<vcenter-ip-or-hostname>`, `<vcenter-user>`, `<vcenter-pass>`, and VM n
 
 # DRBD resource (Master/Slave)
 pcs resource create drbd-boomi ocf:linbit:drbd drbd_resource=boomi \
-  op monitor interval=30s role=Master \
+  op monitor interval=30s role=Pramotable \
   op monitor interval=60s role=Slave \
   promotable
 
@@ -109,7 +109,7 @@ pcs resource create nfs-server systemd:nfs-server op monitor interval=30s
 
 # Virtual IP
 pcs resource create vip-boomi ocf:heartbeat:IPaddr2 \
-  ip=10.76.172.7 cidr_netmask=24 interface=ens192 op monitor interval=15s
+  ip=10.76.172.7 cidr_netmask=24 nic=ens192 op monitor interval=15s
 
 # NFS Export (optional)
 # Note: 'exportfs' OCF agent is not available by default in all distros.
@@ -117,11 +117,11 @@ pcs resource create vip-boomi ocf:heartbeat:IPaddr2 \
 # and instead manage NFS exports using /etc/exports + exportfs -a
 
 # If available:
-# pcs resource create nfs-export-boomi ocf:heartbeat:exportfs \
-#   clientspec="*" \
-#   directory="/mnt/boomi" \
-#   options="rw,no_root_squash,no_subtree_check" \
-#   fsid=0
+ pcs resource create nfs-export-boomi ocf:heartbeat:exportfs \
+   clientspec="*" \
+   directory="/mnt/boomi" \
+   options="rw,no_root_squash,no_subtree_check" \
+   fsid=0
 ```
 
 ```
