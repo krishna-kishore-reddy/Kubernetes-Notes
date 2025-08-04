@@ -2,7 +2,7 @@
 *                                                                                                 *
 * Subject: Imperative Commands | Kubernetes                       				  *
 *                                                                                                 *
-* Author: Srinath Challa | Kubernetes SME | Udemy                                                 *
+* Author: Srinath Challa | Kubernetes SME |                                                  *
 *                                                                                                 *
 * Connect me on:                                                                                  *    
 * --------------                                                                                  *
@@ -69,7 +69,7 @@ INDEX:
 1. POD:
 -------
 # Start a nginx pod.
-kubectl run nginx --image=ngi0nx
+kubectl run nginx --image=nginx
 
 # Start a hazelcast pod and let the container expose port 5701
 kubectl run hazelcast --image=hazelcast/hazelcast --port=5701 
@@ -611,4 +611,5 @@ Service mesh
 How to build linux kernel image and then auto install linux -- Kickstart installation 
 Tuning in linux
 Migration from cloud to on Prem and vice versa
+
 
